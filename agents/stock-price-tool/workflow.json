@@ -18,10 +18,10 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.first().json.body || $input.first().json;\nconst ticker = input.ticker || input.symbol;\nreturn [{json: {ticker: ticker}}];"
+        "jsCode": "const input = $input.first().json.body || $input.first().json;\n\ntry {\n  const ticker = input.ticker || input.symbol;\n  \n  if (!ticker) {\n    throw new Error(Missing required parameter: ticker);\n  }\n  \n  return [{\n    json: {\n      ticker: ticker.toUpperCase(),\n      url: `https://query1.finance.yahoo.com/v8/finance/chart/${ticker.toUpperCase()}`\n    }\n  }];\n} catch (error) {\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      tool_name: Stock Price Tool,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
       },
       "id": "code-1",
-      "name": "Extract Ticker",
+      "name": "Prepare Request",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -31,8 +31,8 @@
     },
     {
       "parameters": {
+        "url": "={{ $json.url }}",
         "method": "GET",
-        "url": "=https://query1.finance.yahoo.com/v8/finance/chart/{{$json.ticker}}",
         "options": {}
       },
       "id": "http-1",
@@ -46,10 +46,10 @@
     },
     {
       "parameters": {
-        "jsCode": "const data = $input.first().json;\nconst ticker = data.chart.result[0].meta.symbol;\nconst price = data.chart.result[0].meta.regularMarketPrice;\nconst currency = data.chart.result[0].meta.currency;\nreturn [{json: {status: success, ticker: ticker, price: price, currency: currency}}];"
+        "jsCode": "const input = $input.first().json;\n\ntry {\n  const ticker = input.chart?.result?.[0]?.meta?.symbol;\n  const price = input.chart?.result?.[0]?.meta?.regularMarketPrice;\n  const currency = input.chart?.result?.[0]?.meta?.currency;\n  \n  if (!price) {\n    throw new Error(Unable to fetch stock price - ticker may be invalid);\n  }\n  \n  return [{\n    json: {\n      status: success,\n      ticker: ticker,\n      price: price,\n      currency: currency,\n      timestamp: new Date().toISOString()\n    }\n  }];\n} catch (error) {\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      tool_name: Stock Price Tool,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
       },
       "id": "code-2",
-      "name": "Format Response",
+      "name": "Parse Response",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
@@ -74,14 +74,14 @@
       "main": [
         [
           {
-            "node": "Extract Ticker",
+            "node": "Prepare Request",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Extract Ticker": {
+    "Prepare Request": {
       "main": [
         [
           {
@@ -96,14 +96,14 @@
       "main": [
         [
           {
-            "node": "Format Response",
+            "node": "Parse Response",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Format Response": {
+    "Parse Response": {
       "main": [
         [
           {
