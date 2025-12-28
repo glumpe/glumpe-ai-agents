@@ -1,0 +1,215 @@
+{
+  "name": "Healthcare Bot V3",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "healthcare-bot-v3",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.body || $input.first().json;\n\ntry {\n  const query = input.query || input.message || input.text || ;\n  \n  if (!query) {\n    throw new Error(No query provided);\n  }\n  \n  return [{\n    json: {\n      chatInput: query,\n      originalQuery: query\n    }\n  }];\n} catch (error) {\n  if (error.message.includes(NEED_TOOL:)) {\n    return [{\n      json: {\n        status: tool_request,\n        agent_name: Healthcare Bot V3,\n        tool_needed: error.message.replace(NEED_TOOL:, ).trim(),\n        context: Extracting user query,\n        original_input: input,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Healthcare Bot V3,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-1",
+      "name": "Extract Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are Healthcare Bot, a trusted medical research assistant providing evidence-based health information for elderly users.\n\nCORE PRINCIPLES:\n1. ONLY use scientifically proven, medically-backed information\n2. Cite trusted sources: CDC, WHO, NIH, Mayo Clinic, Cleveland Clinic, PubMed\n3. Use simple, clear language appropriate for elderly readers\n4. NEVER diagnose - only provide educational information\n5. Always recommend consulting healthcare professionals\n\nMYTH BUSTING: When you detect medical myths (feed a cold starve a fever, 8 glasses water daily, vaccines cause autism, etc), flag and debunk them with evidence.\n\nRESPONSE FORMAT:\n📋 ANSWER: [Clear explanation]\n📚 EVIDENCE & SOURCES: [Medical sources]\n⚠️ MYTH ALERT (if applicable): [Debunk myths]\n🏥 WHEN TO SEE A DOCTOR: [Guidance]\n⚕️ DISCLAIMER: This is educational only, not medical advice. Consult healthcare professionals for medical decisions.\n\nAt the END of your response, add a category tag on its own line like this:\n[CATEGORY: Pain Management] or [CATEGORY: Medication] or [CATEGORY: Nutrition] or [CATEGORY: Sleep] or [CATEGORY: Heart Health] or [CATEGORY: Mental Health] or [CATEGORY: General Wellness] or [CATEGORY: Myth Busting] or [CATEGORY: Emergency] or [CATEGORY: Other]\n\nFLAG EMERGENCIES: chest pain, stroke signs (FAST), severe allergic reactions, high fever with stiff neck, sudden severe headache, uncontrolled bleeding - advise calling emergency services immediately."
+        }
+      },
+      "id": "ai-agent-1",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": "claude-sonnet-4-5-20250929"
+      },
+      "id": "chat-model-1",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.8,
+      "position": [
+        400,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\ntry {\n  const response = input.output || input.text || ;\n  const query = input.chatInput || ;\n  \n  // Extract category from [CATEGORY: X] pattern\n  const categoryMatch = response.match(/\\[CATEGORY:\\s*([^\\]]+)\\]/i);\n  const category = categoryMatch ? categoryMatch[1].trim() : Other;\n  \n  // Remove category tag from response\n  const cleanedResponse = response.replace(/\\[CATEGORY:\\s*[^\\]]+\\]/gi, ).trim();\n  \n  return [{\n    json: {\n      timestamp: new Date().toISOString(),\n      query: query,\n      response: cleanedResponse,\n      category: category,\n      fullResponse: response\n    }\n  }];\n} catch (error) {\n  if (error.message.includes(NEED_TOOL:)) {\n    return [{\n      json: {\n        status: tool_request,\n        agent_name: Healthcare Bot V3,\n        tool_needed: error.message.replace(NEED_TOOL:, ).trim(),\n        context: Categorizing response,\n        original_input: input,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Healthcare Bot V3,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-2",
+      "name": "Categorize",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": "15YbTw_tpB1CE4Mlxt2wIZ7bivmuh70pfs_vIiNfZXXY",
+        "sheetName": "Sheet1",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $json.timestamp }}",
+            "Query": "={{ $json.query }}",
+            "Response": "={{ $json.response }}",
+            "Category": "={{ $json.category }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "google-sheets-1",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        800,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets-oauth",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\ntry {\n  return [{\n    json: {\n      status: success,\n      response: input.response,\n      category: input.category,\n      timestamp: input.timestamp\n    }\n  }];\n} catch (error) {\n  if (error.message.includes(NEED_TOOL:)) {\n    return [{\n      json: {\n        status: tool_request,\n        agent_name: Healthcare Bot V3,\n        tool_needed: error.message.replace(NEED_TOOL:, ).trim(),\n        context: Formatting response,\n        original_input: input,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Healthcare Bot V3,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-3",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "respond-1",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1200,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Query": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Categorize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Categorize": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}
