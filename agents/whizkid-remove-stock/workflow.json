@@ -1,0 +1,165 @@
+{
+  "name": "Whizkid Remove Stock",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whizkid-remove-stock",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://mcp.glumpe.com/screener",
+        "method": "GET"
+      },
+      "id": "http-1",
+      "name": "Fetch Screener Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $(Webhook).first().json.body;\nconst screenerData = $input.first().json;\n\ntry {\n  const ticker = input.ticker;\n  \n  if (!ticker) {\n    return [{\n      json: {\n        status: error,\n        error: Missing ticker parameter,\n        agent_name: Whizkid Remove Stock,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  \n  const stocks = screenerData.stocks || [];\n  const stockIndex = stocks.findIndex(s => s.ticker === ticker);\n  \n  if (stockIndex === -1) {\n    return [{\n      json: {\n        status: error,\n        error: `Stock with ticker ${ticker} not found in screener`,\n        agent_name: Whizkid Remove Stock,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  \n  const removedStock = stocks[stockIndex];\n  const signal = removedStock.signal;\n  \n  stocks.splice(stockIndex, 1);\n  \n  const metadata = screenerData.metadata || {};\n  const signalDistribution = metadata.signal_distribution || {};\n  \n  if (metadata.total_positions) {\n    metadata.total_positions--;\n  }\n  \n  if (signalDistribution[signal]) {\n    signalDistribution[signal]--;\n  }\n  \n  metadata.last_updated = new Date().toISOString();\n  \n  const updatedScreener = {\n    ...screenerData,\n    stocks: stocks,\n    metadata: {\n      ...metadata,\n      signal_distribution: signalDistribution\n    }\n  };\n  \n  return [{\n    json: {\n      updatedScreener: updatedScreener,\n      removedTicker: ticker,\n      removedSignal: signal\n    }\n  }];\n} catch (error) {\n  if (error.message.includes(NEED_TOOL:)) {\n    return [{\n      json: {\n        status: tool_request,\n        agent_name: Whizkid Remove Stock,\n        tool_needed: error.message.replace(NEED_TOOL:, ).trim(),\n        context: Removing stock from screener,\n        original_input: input,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Whizkid Remove Stock,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-1",
+      "name": "Remove Stock",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://mcp.glumpe.com/screener",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "body",
+              "value": "={{ JSON.stringify($json.updatedScreener) }}"
+            }
+          ]
+        },
+        "options": {
+          "headers": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "http-2",
+      "name": "Update Screener",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const previousData = $(Remove Stock).first().json;\nconst updatedScreener = previousData.updatedScreener;\n\ntry {\n  const remainingCount = updatedScreener.metadata.total_positions || 0;\n  const removedTicker = previousData.removedTicker;\n  const removedSignal = previousData.removedSignal;\n  \n  return [{\n    json: {\n      status: success,\n      message: `Successfully removed ${removedTicker} from screener`,\n      removed_ticker: removedTicker,\n      removed_signal: removedSignal,\n      remaining_positions: remainingCount,\n      timestamp: new Date().toISOString()\n    }\n  }];\n} catch (error) {\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Whizkid Remove Stock,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-2",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "respond-1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1000,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Fetch Screener Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Screener Data": {
+      "main": [
+        [
+          {
+            "node": "Remove Stock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Stock": {
+      "main": [
+        [
+          {
+            "node": "Update Screener",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Screener": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}
