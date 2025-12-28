@@ -1,0 +1,154 @@
+{
+  "name": "Whizkid Add Stock",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whizkid-add-stock",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://mcp.glumpe.com/screener",
+        "method": "GET",
+        "options": {}
+      },
+      "id": "http-1",
+      "name": "Get Current Screener",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $(Webhook).first().json.body;\nconst screener = $input.first().json;\n\ntry {\n  const ticker = input.ticker?.toUpperCase();\n  const notes = input.notes || ;\n  \n  if (!ticker) {\n    return [{ json: { status: error, error: Ticker is required } }];\n  }\n  \n  // Check if ticker already exists\n  const exists = screener.stocks.some(stock => stock.ticker === ticker);\n  if (exists) {\n    return [{ json: { status: error, error: `Stock ${ticker} already exists in screener` } }];\n  }\n  \n  // Create new stock object\n  const today = new Date().toISOString().split(T)[0];\n  const newStock = {\n    ticker: ticker,\n    company: ticker +  Inc,\n    sector: Pending,\n    added_date: today,\n    current_price: 0,\n    market_cap_b: 0,\n    revenue_growth_yoy: 0,\n    gross_margin: 0,\n    operating_margin: 0,\n    price_to_sales: 0,\n    price_to_earnings: 0,\n    signal: yellow,\n    last_catalyst: Newly added,\n    next_earnings: ,\n    notes: notes,\n    research_status: pending\n  };\n  \n  // Add stock to array\n  screener.stocks.push(newStock);\n  \n  // Update metadata\n  screener.metadata.total_positions = screener.stocks.length;\n  screener.metadata.signal_distribution.yellow = (screener.metadata.signal_distribution.yellow || 0) + 1;\n  screener.metadata.last_updated = new Date().toISOString();\n  \n  return [{ json: screener }];\n} catch (error) {\n  if (error.message.includes(NEED_TOOL:)) {\n    return [{\n      json: {\n        status: tool_request,\n        agent_name: Whizkid Add Stock,\n        tool_needed: error.message.replace(NEED_TOOL:, ).trim(),\n        context: Adding new stock to screener,\n        original_input: input,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Whizkid Add Stock,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-1",
+      "name": "Add Stock to Screener",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://mcp.glumpe.com/screener",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": []
+        },
+        "options": {
+          "bodyContentType": "json"
+        }
+      },
+      "id": "http-2",
+      "name": "Update Screener",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $(Webhook).first().json.body;\nconst updatedScreener = $input.first().json;\n\ntry {\n  const ticker = input.ticker?.toUpperCase();\n  const totalPositions = updatedScreener.metadata?.total_positions || updatedScreener.stocks?.length || 0;\n  \n  return [{\n    json: {\n      status: success,\n      message: `Stock ${ticker} added successfully`,\n      ticker: ticker,\n      total_positions: totalPositions,\n      research_status: pending,\n      timestamp: new Date().toISOString()\n    }\n  }];\n} catch (error) {\n  if (error.message.includes(NEED_TOOL:)) {\n    return [{\n      json: {\n        status: tool_request,\n        agent_name: Whizkid Add Stock,\n        tool_needed: error.message.replace(NEED_TOOL:, ).trim(),\n        context: Formatting success response,\n        original_input: input,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Whizkid Add Stock,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-2",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "respond-1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1000,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Current Screener",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Current Screener": {
+      "main": [
+        [
+          {
+            "node": "Add Stock to Screener",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Stock to Screener": {
+      "main": [
+        [
+          {
+            "node": "Update Screener",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Screener": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}
