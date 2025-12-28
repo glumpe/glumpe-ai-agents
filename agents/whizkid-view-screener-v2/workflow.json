@@ -1,0 +1,72 @@
+{
+  "name": "Whizkid View Screener V2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whizkid-view-screener-v2",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fs = require(fs);\nconst path = require(path);\nconst input = $input.first().json.body || $input.first().json;\n\ntry {\n  const filePath = /data/investment-data/whizkid-screener.json;\n  \n  if (!fs.existsSync(filePath)) {\n    throw new Error(NEED_TOOL: File system access to read /data/investment-data/whizkid-screener.json);\n  }\n  \n  const fileContent = fs.readFileSync(filePath, utf8);\n  const data = JSON.parse(fileContent);\n  \n  const signalEmoji = {\n    green: 🟢,\n    yellow: 🟡,\n    red: 🔴\n  };\n  \n  let markdown = `# Whizkid Stock Screener\\n\\n`;\n  markdown += `**Last Updated:** ${data.last_updated}\\n\\n`;\n  markdown += `## Positions\\n\\n`;\n  markdown += `| Signal | Ticker | Company | Sector | Price | Market Cap (B) | Revenue Growth | Gross Margin | P/S |\\n`;\n  markdown += `|--------|--------|---------|--------|-------|----------------|----------------|--------------|-----|\\n`;\n  \n  data.stocks.forEach(stock => {\n    const emoji = signalEmoji[stock.signal.toLowerCase()] || stock.signal;\n    const price = typeof stock.current_price === number ? `$${stock.current_price.toFixed(2)}` : stock.current_price;\n    const marketCap = typeof stock.market_cap_b === number ? `$${stock.market_cap_b.toFixed(2)}B` : stock.market_cap_b;\n    const revenueGrowth = typeof stock.revenue_growth_yoy === number ? `${stock.revenue_growth_yoy.toFixed(1)}%` : stock.revenue_growth_yoy;\n    const grossMargin = typeof stock.gross_margin === number ? `${stock.gross_margin.toFixed(1)}%` : stock.gross_margin;\n    const ps = typeof stock.price_to_sales === number ? stock.price_to_sales.toFixed(2) : stock.price_to_sales;\n    \n    markdown += `| ${emoji} | ${stock.ticker} | ${stock.company} | ${stock.sector} | ${price} | ${marketCap} | ${revenueGrowth} | ${grossMargin} | ${ps} |\\n`;\n  });\n  \n  markdown += `\\n## Summary\\n\\n`;\n  markdown += `**Total Positions:** ${data.metadata.total_positions}\\n\\n`;\n  markdown += `**Signal Distribution:**\\n`;\n  markdown += `- 🟢 Green: ${data.metadata.signal_distribution.green}\\n`;\n  markdown += `- 🟡 Yellow: ${data.metadata.signal_distribution.yellow}\\n`;\n  markdown += `- 🔴 Red: ${data.metadata.signal_distribution.red}\\n`;\n  \n  return [{\n    json: {\n      status: success,\n      markdown: markdown,\n      data: data,\n      timestamp: new Date().toISOString()\n    }\n  }];\n} catch (error) {\n  if (error.message.includes(NEED_TOOL:)) {\n    return [{\n      json: {\n        status: tool_request,\n        agent_name: Whizkid View Screener V2,\n        tool_needed: error.message.replace(NEED_TOOL:, ).trim(),\n        context: Reading and formatting stock screener data,\n        original_input: input,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Whizkid View Screener V2,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-1",
+      "name": "Read and Format Screener",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "respond-1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        400,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read and Format Screener",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read and Format Screener": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}
