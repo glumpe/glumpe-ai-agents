@@ -1,0 +1,72 @@
+{
+  "name": "Whizkid Screener V4",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whizkid-screener-v4",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "import fs from fs;\n\nconst input = $input.first().json.body || $input.first().json;\n\ntry {\n  const filePath = /data/investment-data/whizkid-screener.json;\n  \n  if (!fs.existsSync(filePath)) {\n    throw new Error(NEED_TOOL: File system access to read /data/investment-data/whizkid-screener.json);\n  }\n  \n  const fileContent = fs.readFileSync(filePath, utf8);\n  const data = JSON.parse(fileContent);\n  \n  const signalEmoji = {\n    green: 🟢,\n    yellow: 🟡,\n    red: 🔴\n  };\n  \n  let markdown = `# Whizkid Screener Report\\n\\n`;\n  markdown += `**Last Updated:** ${data.last_updated}\\n\\n`;\n  markdown += `**Total Positions:** ${data.metadata.total_positions}\\n`;\n  markdown += `**Signal Distribution:** 🟢 ${data.metadata.signal_distribution.green} | 🟡 ${data.metadata.signal_distribution.yellow} | 🔴 ${data.metadata.signal_distribution.red}\\n\\n`;\n  \n  markdown += `| Signal | Ticker | Company | Sector | Price | Market Cap (B) | Revenue Growth YoY | Gross Margin | P/S Ratio |\\n`;\n  markdown += `|--------|--------|---------|--------|-------|----------------|-------------------|--------------|-----------|\\n`;\n  \n  data.stocks.forEach(stock => {\n    const emoji = signalEmoji[stock.signal] || ⚪;\n    markdown += `| ${emoji} | ${stock.ticker} | ${stock.company} | ${stock.sector} | $${stock.current_price} | $${stock.market_cap_b}B | ${stock.revenue_growth_yoy} | ${stock.gross_margin} | ${stock.price_to_sales} |\\n`;\n  });\n  \n  return [{\n    json: {\n      status: success,\n      output: markdown,\n      metadata: data.metadata,\n      timestamp: new Date().toISOString()\n    }\n  }];\n  \n} catch (error) {\n  if (error.message.includes(NEED_TOOL:)) {\n    return [{\n      json: {\n        status: tool_request,\n        agent_name: Whizkid Screener V4,\n        tool_needed: error.message.replace(NEED_TOOL:, ).trim(),\n        context: Reading and formatting investment screening data,\n        original_input: input,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Whizkid Screener V4,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-1",
+      "name": "Read and Format Screener Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "respond-1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        400,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read and Format Screener Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read and Format Screener Data": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}
