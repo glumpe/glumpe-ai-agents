@@ -1,0 +1,16 @@
+# Secrets
+*.env
+**/credentials.json
+**/*token*
+**/*key*
+
+# Data files
+data/*.json
+!data/schemas/
+
+# Logs
+*.log
+logs/
+
+# N8N specific
+.n8n/
