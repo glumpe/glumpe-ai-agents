@@ -1,0 +1,81 @@
+{
+  "name": "Butt Joke Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "butt-joke-generator",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const buttJokes = [\n  \"Why dont butts ever get lost? They always know where the bottom is!",
+ "What did one butt cheek say to the other? Together we can stop this crap!",
+ "Why did the butt go to therapy? It had too many cracks in its foundation!",
+ "Whats a butts favorite type of music? Hip-hop!",
+ "Why dont butts make good comedians? Their jokes are always cheeky!\",\n  \"What do you call a butt that tells jokes? A wise-crack!\",\n  \"Why was the butt always invited to parties? It knew how to shake things up!\",\n  \"Whats the difference between a butt and a drum? You can only slap one in public!",
+ "Why did the butt become a philosopher? It was always contemplating the bottom line!",
+ "What did the butt say when it won the lottery? This is a real pain in the assets!",
+ "Why dont butts ever win arguments? They always crack under pressure!\",\n  \"Whats a butts favorite exercise? Squats, obviously!\",\n  \"Why did the butt go to school? To get some class!\",\n  \"What do you call a butt with a PhD? A smartass!\",\n  \"Why was the butt great at poker? It had the best poker face... from behind!\",\n  \"Whats a butts favorite dance move? The booty shake!\",\n  \"Why dont butts make good secret agents? Theyre always being followed!\",\n  \"What did the butt say to the toilet? You complete me!\",\n  \"Why was the butt always calm? It knew how to sit on its problems!\",\n  \"Whats the butts motto? Keep your friends close and your enemies behind you!\"\n];\n\nconst randomJoke = buttJokes[Math.floor(Math.random() * buttJokes.length)];\n\nreturn [{\n  json: {\n    joke: randomJoke,\n    brand: \"analasis.com\",\n    category: \"butt_humor\",\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "code-1",
+      "name": "Generate Butt Joke",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "allEntries"
+      },
+      "id": "respond-1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        400,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate Butt Joke",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Butt Joke": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}
