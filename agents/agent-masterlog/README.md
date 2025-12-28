@@ -1,12 +1,12 @@
 # Agent Masterlog
 
-Centralized logging system for all agent actions on the VPS
+Receives POST requests with JSON data and appends them with timestamps to /data/logs/agent-sessions.jsonl
 
 ## Type
 workflow
 
 ## Created
-2025-12-28T13:56:01.399Z
+2025-12-28T14:25:40.927Z
 
 ## Files
 - `workflow.json` - N8N workflow definition
