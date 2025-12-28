@@ -1,0 +1,81 @@
+{
+  "name": "Dad Joke Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "dad-joke-generator",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const jokes = [\n  {setup: \"Why dont scientists trust atoms?", punchline: "Because they make up everything!"},
+ {setup: "What do you call a fake noodle?", punchline: "An impasta!"},
+ {setup: "Why did the scarecrow win an award?", punchline: "He was outstanding in his field!"},
+ {setup: "What do you call cheese that isnt yours?\", punchline: \"Nacho cheese!\"},\n  {setup: \"Why dont eggs tell jokes?", punchline: "Theyd crack each other up!\"},\n  {setup: \"What did the ocean say to the beach?\", punchline: \"Nothing, it just waved!\"},\n  {setup: \"Why did the bicycle fall over?\", punchline: \"It was two tired!\"},\n  {setup: \"What do you call a bear with no teeth?\", punchline: \"A gummy bear!\"},\n  {setup: \"How do you organize a space party?\", punchline: \"You planet!\"},\n  {setup: \"Why did the math book look sad?\", punchline: \"Because it had too many problems!\"},\n  {setup: \"What did one wall say to the other wall?\", punchline: \"Ill meet you at the corner!"},
+ {setup: "Why dont skeletons fight each other?\", punchline: \"They dont have the guts!"},
+ {setup: "What do you call a dog magician?", punchline: "A labracadabrador!"},
+ {setup: "Why did the coffee file a police report?", punchline: "It got mugged!"},
+ {setup: "Whats brown and sticky?\", punchline: \"A stick!\"}\n];\n\nconst randomJoke = jokes[Math.floor(Math.random() * jokes.length)];\n\nreturn [{\n  json: {\n    joke: `${randomJoke.setup} ${randomJoke.punchline}`,\n    setup: randomJoke.setup,\n    punchline: randomJoke.punchline,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "code-1",
+      "name": "Generate Dad Joke",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstEntryJson"
+      },
+      "id": "respond-1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        400,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate Dad Joke",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Dad Joke": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}
