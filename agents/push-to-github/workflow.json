@@ -1,0 +1,144 @@
+{
+  "name": "Push to GitHub",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "push-to-github",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.body || $input.first().json;\n\ntry {\n  if (!input.path || !input.content || !input.message) {\n    throw new Error(Missing required fields: path, content, message);\n  }\n  \n  const escapedContent = input.content.replace(//g, "\\\\\");\n  const fullPath = `/opt/glumpe-ai-agents/${input.path}`;\n  const writeCommand = `cat << EOF > ${fullPath}\\n${input.content}\\nEOF`;\n  \n  return [{\n    json: {\n      writeCommand: writeCommand,\n      commitMessage: input.message,\n      path: input.path,\n      fullPath: fullPath\n    }\n  }];\n} catch (error) {\n  if (error.message.includes(NEED_TOOL:)) {\n    return [{\n      json: {\n        status: tool_request,\n        agent_name: Push to GitHub,\n        tool_needed: error.message.replace(NEED_TOOL:, ).trim(),\n        context: Preparing file write and git commit,\n        original_input: input,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Push to GitHub,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-1",
+      "name": "Prepare Commands",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "command": "={{ $json.writeCommand }}"
+      },
+      "id": "ssh-1",
+      "name": "Write File",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=cd /opt/glumpe-ai-agents && git add . && git commit -m \"{{ $(Prepare Commands).item.json.commitMessage }}\" && git push"
+      },
+      "id": "ssh-2",
+      "name": "Git Commit and Push",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\n\ntry {\n  return [{\n    json: {\n      status: success,\n      message: File written and pushed to GitHub,\n      path: $(Prepare Commands).item.json.path,\n      commit_message: $(Prepare Commands).item.json.commitMessage,\n      git_output: input.stdout || input,\n      timestamp: new Date().toISOString()\n    }\n  }];\n} catch (error) {\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Push to GitHub,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-2",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "respond-1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1000,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Commands",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Commands": {
+      "main": [
+        [
+          {
+            "node": "Write File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write File": {
+      "main": [
+        [
+          {
+            "node": "Git Commit and Push",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Git Commit and Push": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}
