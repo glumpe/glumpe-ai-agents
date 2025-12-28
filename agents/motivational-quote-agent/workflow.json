@@ -1,0 +1,81 @@
+{
+  "name": "Motivational Quote Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "motivational-quote",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const quotes = [\n  \"The only way to do great work is to love what you do. - Steve Jobs\",\n  \"Innovation distinguishes between a leader and a follower. - Steve Jobs\",\n  \"Life is what happens to you while youre busy making other plans. - John Lennon",
+ "The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt",
+ "It is during our darkest moments that we must focus to see the light. - Aristotle",
+ "The only impossible journey is the one you never begin. - Tony Robbins",
+ "In the middle of difficulty lies opportunity. - Albert Einstein",
+ "Success is not final, failure is not fatal: it is the courage to continue that counts. - Winston Churchill",
+ "The way to get started is to quit talking and begin doing. - Walt Disney",
+ "Dont let yesterday take up too much of today. - Will Rogers\",\n  \"You learn more from failure than from success. Dont let it stop you. Failure builds character. - Unknown",
+ "If you are working on something that you really care about, you dont have to be pushed. The vision pulls you. - Steve Jobs\"\n];\n\nconst randomIndex = Math.floor(Math.random() * quotes.length);\nconst selectedQuote = quotes[randomIndex];\n\nreturn [{\n  json: {\n    quote: selectedQuote,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "code-1",
+      "name": "Generate Random Quote",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "firstEntryJson"
+      },
+      "id": "respond-1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        400,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate Random Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Random Quote": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
