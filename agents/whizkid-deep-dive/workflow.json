@@ -1,0 +1,72 @@
+{
+  "name": "Whizkid Deep Dive",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whizkid-deep-dive",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.body || $input.first().json;\n\ntry {\n  const ticker = input.ticker || [TICKER];\n  const focusAreas = input.focus_areas || [];\n  const timestamp = new Date().toISOString().split(T)[0];\n  \n  const report = `# Investment Analysis Report: ${ticker}\n**Generated:** ${timestamp}\n**Focus Areas:** ${focusAreas.length > 0 ? focusAreas.join(, ) : Comprehensive Analysis}\n\n---\n\n## 1. Executive Summary\n\n### Quick Stats\n- **Company Name:** [RESEARCH NEEDED]\n- **Sector:** [RESEARCH NEEDED]\n- **Industry:** [RESEARCH NEEDED]\n- **Market Cap:** [RESEARCH NEEDED]\n- **Current Price:** [RESEARCH NEEDED]\n- **52-Week Range:** [RESEARCH NEEDED]\n- **Average Volume:** [RESEARCH NEEDED]\n\n### Investment Highlight\n[RESEARCH NEEDED: 2-3 sentence summary of key investment thesis]\n\n---\n\n## 2. Business Model\n\n### Core Operations\n[RESEARCH NEEDED: Describe primary business operations and how the company makes money]\n\n### Products & Services\n[RESEARCH NEEDED: List and describe main product/service offerings]\n- **Product/Service 1:** [RESEARCH NEEDED]\n- **Product/Service 2:** [RESEARCH NEEDED]\n- **Product/Service 3:** [RESEARCH NEEDED]\n\n### Market Opportunity\n- **Total Addressable Market (TAM):** [RESEARCH NEEDED]\n- **Serviceable Addressable Market (SAM):** [RESEARCH NEEDED]\n- **Market Growth Rate:** [RESEARCH NEEDED]\n- **Company Market Share:** [RESEARCH NEEDED]\n\n### Competitive Advantages\n[RESEARCH NEEDED: Identify and explain moats]\n1. **Advantage 1:** [RESEARCH NEEDED]\n2. **Advantage 2:** [RESEARCH NEEDED]\n3. **Advantage 3:** [RESEARCH NEEDED]\n\n---\n\n## 3. Financial Performance\n\n### Revenue Analysis\n- **TTM Revenue:** [RESEARCH NEEDED]\n- **Revenue Growth (YoY):** [RESEARCH NEEDED]\n- **Revenue Growth (3Y CAGR):** [RESEARCH NEEDED]\n- **Revenue by Segment:** [RESEARCH NEEDED]\n- **Geographic Revenue Mix:** [RESEARCH NEEDED]\n\n### Profitability Metrics\n- **Gross Margin:** [RESEARCH NEEDED]\n- **Operating Margin:** [RESEARCH NEEDED]\n- **Net Margin:** [RESEARCH NEEDED]\n- **EBITDA Margin:** [RESEARCH NEEDED]\n- **ROE (Return on Equity):** [RESEARCH NEEDED]\n- **ROIC (Return on Invested Capital):** [RESEARCH NEEDED]\n\n### Cash Flow\n- **Operating Cash Flow:** [RESEARCH NEEDED]\n- **Free Cash Flow:** [RESEARCH NEEDED]\n- **FCF Margin:** [RESEARCH NEEDED]\n- **Capital Expenditures:** [RESEARCH NEEDED]\n- **FCF Conversion Rate:** [RESEARCH NEEDED]\n\n### Balance Sheet Health\n- **Total Cash:** [RESEARCH NEEDED]\n- **Total Debt:** [RESEARCH NEEDED]\n- **Net Debt:** [RESEARCH NEEDED]\n- **Debt/Equity Ratio:** [RESEARCH NEEDED]\n- **Current Ratio:** [RESEARCH NEEDED]\n- **Quick Ratio:** [RESEARCH NEEDED]\n\n---\n\n## 4. Competitive Position\n\n### Industry Overview\n[RESEARCH NEEDED: Describe industry dynamics, trends, and outlook]\n\n### Key Competitors\n1. **Competitor 1:** [RESEARCH NEEDED - market position, strengths]\n2. **Competitor 2:** [RESEARCH NEEDED - market position, strengths]\n3. **Competitor 3:** [RESEARCH NEEDED - market position, strengths]\n\n### Competitive Matrix\n| Company | Market Cap | Revenue Growth | Margins | Market Share |\n|---------|-----------|----------------|---------|-------------|\n| ${ticker} | [RESEARCH NEEDED] | [RESEARCH NEEDED] | [RESEARCH NEEDED] | [RESEARCH NEEDED] |\n| Competitor 1 | [RESEARCH NEEDED] | [RESEARCH NEEDED] | [RESEARCH NEEDED] | [RESEARCH NEEDED] |\n| Competitor 2 | [RESEARCH NEEDED] | [RESEARCH NEEDED] | [RESEARCH NEEDED] | [RESEARCH NEEDED] |\n\n---\n\n## 5. Valuation Analysis\n\n### Current Valuation Metrics\n- **P/E Ratio:** [RESEARCH NEEDED]\n- **Forward P/E:** [RESEARCH NEEDED]\n- **PEG Ratio:** [RESEARCH NEEDED]\n- **P/S Ratio:** [RESEARCH NEEDED]\n- **P/B Ratio:** [RESEARCH NEEDED]\n- **EV/EBITDA:** [RESEARCH NEEDED]\n- **EV/Sales:** [RESEARCH NEEDED]\n\n### Relative Valuation\n- **Industry Average P/E:** [RESEARCH NEEDED]\n- **Peer Average P/E:** [RESEARCH NEEDED]\n- **Historical Average P/E (5Y):** [RESEARCH NEEDED]\n- **Premium/Discount to Peers:** [RESEARCH NEEDED]\n\n### Intrinsic Value Estimate\n- **DCF Valuation:** [RESEARCH NEEDED]\n- **Assumptions:** [RESEARCH NEEDED - WACC, growth rates, terminal value]\n- **Fair Value Range:** [RESEARCH NEEDED]\n- **Upside/Downside:** [RESEARCH NEEDED]\n\n---\n\n## 6. Risk Factors\n\n### Company-Specific Risks\n1. **Risk 1:** [RESEARCH NEEDED]\n2. **Risk 2:** [RESEARCH NEEDED]\n3. **Risk 3:** [RESEARCH NEEDED]\n\n### Industry Risks\n1. **Risk 1:** [RESEARCH NEEDED]\n2. **Risk 2:** [RESEARCH NEEDED]\n\n### Financial Risks\n- **Debt Burden:** [RESEARCH NEEDED]\n- **Cash Burn:** [RESEARCH NEEDED]\n- **Liquidity Concerns:** [RESEARCH NEEDED]\n\n### ESG Considerations\n- **Environmental:** [RESEARCH NEEDED]\n- **Social:** [RESEARCH NEEDED]\n- **Governance:** [RESEARCH NEEDED]\n- **ESG Score:** [RESEARCH NEEDED]\n\n---\n\n## 7. Investment Thesis\n\n### Bull Case\n[RESEARCH NEEDED: Strongest arguments for upside]\n- **Key Driver 1:** [RESEARCH NEEDED]\n- **Key Driver 2:** [RESEARCH NEEDED]\n- **Key Driver 3:** [RESEARCH NEEDED]\n- **Upside Scenario:** [RESEARCH NEEDED - price target]\n\n### Bear Case\n[RESEARCH NEEDED: Strongest arguments for downside]\n- **Key Risk 1:** [RESEARCH NEEDED]\n- **Key Risk 2:** [RESEARCH NEEDED]\n- **Key Risk 3:** [RESEARCH NEEDED]\n- **Downside Scenario:** [RESEARCH NEEDED - price target]\n\n### Base Case\n[RESEARCH NEEDED: Most likely scenario]\n- **Probability-Weighted Outcome:** [RESEARCH NEEDED]\n- **Expected Return:** [RESEARCH NEEDED]\n- **Time Horizon:** [RESEARCH NEEDED]\n\n---\n\n## 8. Investment Recommendation\n\n### Rating\n**[RESEARCH NEEDED: BUY / HOLD / SELL]**\n\n### Target Price\n- **12-Month Target:** [RESEARCH NEEDED]\n- **Upside Potential:** [RESEARCH NEEDED]\n- **Confidence Level:** [RESEARCH NEEDED]\n\n### Key Catalysts\n1. **Near-Term (0-6 months):** [RESEARCH NEEDED]\n2. **Medium-Term (6-12 months):** [RESEARCH NEEDED]\n3. **Long-Term (12+ months):** [RESEARCH NEEDED]\n\n### Entry Points\n- **Ideal Entry Price:** [RESEARCH NEEDED]\n- **Aggressive Entry:** [RESEARCH NEEDED]\n- **Conservative Entry:** [RESEARCH NEEDED]\n\n### Action Items\n- [ ] [RESEARCH NEEDED: Specific action 1]\n- [ ] [RESEARCH NEEDED: Specific action 2]\n- [ ] [RESEARCH NEEDED: Specific action 3]\n- [ ] Monitor earnings report on [RESEARCH NEEDED]\n- [ ] Review position after [RESEARCH NEEDED]\n\n---\n\n## Disclaimer\n*This analysis is for informational purposes only and does not constitute investment advice. Always conduct your own research and consult with a qualified financial advisor before making investment decisions.*\n\n---\n\n**Report End**\n`;\n\n  return [{\n    json: {\n      status: success,\n      ticker: ticker,\n      focus_areas: focusAreas,\n      message: report,\n      timestamp: new Date().toISOString()\n    }\n  }];\n} catch (error) {\n  if (error.message.includes(NEED_TOOL:)) {\n    return [{\n      json: {\n        status: tool_request,\n        agent_name: Whizkid Deep Dive,\n        tool_needed: error.message.replace(NEED_TOOL:, ).trim(),\n        context: Generating investment analysis report,\n        original_input: input,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Whizkid Deep Dive,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-1",
+      "name": "Generate Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "respond-1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        400,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Report": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}
