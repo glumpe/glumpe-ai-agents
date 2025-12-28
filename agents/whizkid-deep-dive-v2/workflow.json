@@ -1,0 +1,72 @@
+{
+  "name": "Whizkid Deep Dive V2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whizkid-deep-dive-v2",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.body || $input.first().json;\n\ntry {\n  const ticker = input.ticker || UNKNOWN;\n  const focusAreas = input.focus_areas || [General Analysis];\n  const timestamp = new Date().toISOString().split(T)[0];\n  \n  // Generate comprehensive markdown report\n  const report = `# Investment Analysis Report: ${ticker}\n**Generated:** ${timestamp}\n**Focus Areas:** ${Array.isArray(focusAreas) ? focusAreas.join(, ) : focusAreas}\n\n---\n\n## Executive Summary\n\n[This section provides a high-level overview of the investment opportunity, key findings, and the final recommendation. Include:\n- Company overview and market position\n- Key financial metrics snapshot\n- Primary investment highlights\n- Major risks identified\n- Final recommendation (Buy/Hold/Sell)]\n\n**Quick Stats:**\n- Market Cap: [RESEARCH NEEDED]\n- P/E Ratio: [RESEARCH NEEDED]\n- Revenue Growth (YoY): [RESEARCH NEEDED]\n- Profit Margin: [RESEARCH NEEDED]\n\n---\n\n## Business Model\n\n### Core Operations\n[Describe how the company makes money, its primary revenue streams, and business model sustainability]\n\n### Products & Services\n[Detail the main offerings and their market fit]\n\n### Market Opportunity\n- **Total Addressable Market (TAM):** [RESEARCH NEEDED]\n- **Market Position:** [RESEARCH NEEDED]\n- **Growth Drivers:** [RESEARCH NEEDED]\n\n### Competitive Advantages\n[Identify moats: brand strength, network effects, cost advantages, regulatory barriers, switching costs, etc.]\n\n---\n\n## Financial Performance\n\n### Revenue Analysis\n- **Current Revenue:** [RESEARCH NEEDED]\n- **Revenue Growth Rate:** [RESEARCH NEEDED]\n- **Revenue Quality:** [Analyze recurring vs. one-time, geographic/segment breakdown]\n\n### Profitability Metrics\n- **Gross Margin:** [RESEARCH NEEDED]\n- **Operating Margin:** [RESEARCH NEEDED]\n- **Net Margin:** [RESEARCH NEEDED]\n- **EBITDA:** [RESEARCH NEEDED]\n\n### Cash Flow & Balance Sheet\n- **Operating Cash Flow:** [RESEARCH NEEDED]\n- **Free Cash Flow:** [RESEARCH NEEDED]\n- **Debt-to-Equity Ratio:** [RESEARCH NEEDED]\n- **Current Ratio:** [RESEARCH NEEDED]\n- **Cash Position:** [RESEARCH NEEDED]\n\n### Historical Trends\n[3-5 year trend analysis of key metrics]\n\n---\n\n## Competitive Position\n\n### Industry Landscape\n[Overview of the industry structure, growth trends, and dynamics]\n\n### Key Competitors\n1. **[Competitor 1]:** [Market position, strengths]\n2. **[Competitor 2]:** [Market position, strengths]\n3. **[Competitor 3]:** [Market position, strengths]\n\n### Competitive Analysis Matrix\n| Factor | ${ticker} | Competitor 1 | Competitor 2 |\n|--------|----------|--------------|-------------|\n| Market Share | [RESEARCH] | [RESEARCH] | [RESEARCH] |\n| Growth Rate | [RESEARCH] | [RESEARCH] | [RESEARCH] |\n| Margins | [RESEARCH] | [RESEARCH] | [RESEARCH] |\n| Innovation | [RESEARCH] | [RESEARCH] | [RESEARCH] |\n\n### Differentiation Strategy\n[How the company stands out from competitors]\n\n---\n\n## Valuation\n\n### Current Valuation Metrics\n- **Price-to-Earnings (P/E):** [RESEARCH NEEDED]\n- **Price-to-Sales (P/S):** [RESEARCH NEEDED]\n- **Price-to-Book (P/B):** [RESEARCH NEEDED]\n- **EV/EBITDA:** [RESEARCH NEEDED]\n- **PEG Ratio:** [RESEARCH NEEDED]\n\n### Relative Valuation\n[Compare to sector averages and direct competitors]\n\n### Intrinsic Value Assessment\n[DCF analysis framework or comparable approach]\n- **Fair Value Estimate:** [CALCULATION NEEDED]\n- **Upside/Downside:** [PERCENTAGE]\n\n### Valuation Conclusion\n[Is the stock overvalued, fairly valued, or undervalued based on analysis?]\n\n---\n\n## Risk Factors\n\n### Company-Specific Risks\n1. **[Risk 1]:** [Description and potential impact]\n2. **[Risk 2]:** [Description and potential impact]\n3. **[Risk 3]:** [Description and potential impact]\n\n### Industry & Market Risks\n- **Regulatory Risk:** [Assessment]\n- **Technological Disruption:** [Assessment]\n- **Market Cyclicality:** [Assessment]\n- **Competition Intensity:** [Assessment]\n\n### Financial Risks\n- **Leverage/Debt Concerns:** [Assessment]\n- **Cash Flow Volatility:** [Assessment]\n- **Capital Allocation:** [Assessment]\n\n### ESG Considerations\n[Environmental, Social, and Governance factors that could impact long-term value]\n\n**Risk Rating:** [Low/Medium/High]\n\n---\n\n## Investment Thesis\n\n### Bull Case 🐂\n**Why ${ticker} Could Significantly Outperform:**\n\n1. **[Bull Point 1]:** [Detailed explanation of positive catalyst]\n2. **[Bull Point 2]:** [Detailed explanation of growth opportunity]\n3. **[Bull Point 3]:** [Detailed explanation of competitive advantage]\n4. **[Bull Point 4]:** [Detailed explanation of valuation opportunity]\n\n**Best Case Scenario:** [Describe potential upside]\n**Potential Return:** [TARGET PRICE] ([XX]% upside)\n\n### Bear Case 🐻\n**Why ${ticker} Could Underperform:**\n\n1. **[Bear Point 1]:** [Detailed explanation of risk/headwind]\n2. **[Bear Point 2]:** [Detailed explanation of competitive threat]\n3. **[Bear Point 3]:** [Detailed explanation of valuation concern]\n4. **[Bear Point 4]:** [Detailed explanation of execution risk]\n\n**Worst Case Scenario:** [Describe potential downside]\n**Downside Risk:** [FLOOR PRICE] ([XX]% downside)\n\n### Base Case\n[Most likely scenario balancing bull and bear factors]\n\n---\n\n## Recommendation\n\n### Investment Rating: [BUY / HOLD / SELL]\n\n### Target Price: $[XX.XX]\n**Current Price:** [RESEARCH NEEDED]\n**Implied Return:** [XX]%\n\n### Time Horizon: [Short/Medium/Long-term]\n\n### Conviction Level: [High/Medium/Low]\n\n### Key Catalysts to Watch\n1. [Upcoming event/metric that could drive price]\n2. [Quarterly result or product launch]\n3. [Industry trend or regulatory decision]\n\n### Ideal Entry Points\n- **Aggressive:** [PRICE LEVEL]\n- **Moderate:** [PRICE LEVEL]\n- **Conservative:** [PRICE LEVEL]\n\n### Position Sizing Guidance\n[Suggested portfolio allocation based on risk profile]\n\n### Action Items\n- [ ] Monitor [specific metric]\n- [ ] Review quarterly earnings on [DATE]\n- [ ] Re-evaluate thesis if [condition]\n- [ ] Set price alerts at [LEVEL]\n\n---\n\n## Appendix\n\n### Assumptions & Methodology\n[Document key assumptions used in analysis]\n\n### Data Sources\n[List primary research sources]\n\n### Disclaimer\n*This report is for informational purposes only and does not constitute investment advice. Past performance does not guarantee future results. Always conduct your own due diligence and consult with a financial advisor.*\n\n---\n\n**Report Generated by:** Whizkid Deep Dive V2 Agent\n**Timestamp:** ${new Date().toISOString()}\n**Status:** Template Generated - Requires Research Data Population\n`;\n\n  return [{\n    json: {\n      status: success,\n      message: report,\n      ticker: ticker,\n      focus_areas: focusAreas,\n      timestamp: new Date().toISOString()\n    }\n  }];\n  \n} catch (error) {\n  if (error.message.includes(NEED_TOOL:)) {\n    return [{\n      json: {\n        status: tool_request,\n        agent_name: Whizkid Deep Dive V2,\n        tool_needed: error.message.replace(NEED_TOOL:, ).trim(),\n        context: Generating investment analysis report,\n        original_input: input,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Whizkid Deep Dive V2,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-1",
+      "name": "Generate Analysis Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "respond-1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        400,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate Analysis Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Analysis Report": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}
