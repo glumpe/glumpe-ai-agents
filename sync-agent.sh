@@ -36,10 +36,11 @@ $timestamp
 This agent is managed by the Meta-Agent system.
 READMEEOF
 
-# Git operations
+# Git operations (suppress output)
 cd /opt/glumpe-ai-agents
-git add .
-git commit -m "$commit_message" || true
-git push origin main
+git add . >/dev/null 2>&1
+git commit -m "$commit_message" >/dev/null 2>&1 || true
+git push origin main >/dev/null 2>&1
 
+# Output only JSON
 echo '{"success": true, "message": "Agent synced to GitHub", "agent_name": "'"$agent_name"'", "safe_name": "'"$safe_name"'", "github_url": "https://github.com/glumpe/glumpe-ai-agents/tree/main/agents/'"$safe_name"'"}'
