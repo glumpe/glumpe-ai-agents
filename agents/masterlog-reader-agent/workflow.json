@@ -1,0 +1,72 @@
+{
+  "name": "Masterlog Reader Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "masterlog-reader-agent",
+        "responseMode": "responseNode"
+      },
+      "id": "webhook-1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json.body || $input.first().json;\n\ntry {\n  // This agent needs SSH capabilities to read remote files\n  throw new Error(NEED_TOOL: SSH client to connect to server and execute cat /agents/memory/agent-masterlog.md command);\n} catch (error) {\n  if (error.message.includes(NEED_TOOL:)) {\n    return [{\n      json: {\n        status: tool_request,\n        agent_name: Masterlog Reader Agent,\n        tool_needed: error.message.replace(NEED_TOOL:, ).trim(),\n        context: Reading masterlog file from remote server via SSH,\n        original_input: input,\n        timestamp: new Date().toISOString()\n      }\n    }];\n  }\n  return [{\n    json: {\n      status: error,\n      error: error.message,\n      agent_name: Masterlog Reader Agent,\n      timestamp: new Date().toISOString()\n    }\n  }];\n}"
+      },
+      "id": "code-1",
+      "name": "Read Masterlog",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "respond-1",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        400,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read Masterlog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Masterlog": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}
